@@ -1,14 +1,20 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../app');
-const User = require('./User');
+const sequelize = require('../../config/db');
 
 const Cart = sequelize.define('Cart', {
-  userId: { type: DataTypes.INTEGER, allowNull: false, references: { model: User, key: 'id' } },
-  items: { type: DataTypes.JSON, allowNull: false, defaultValue: [] },  
-  updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  items: {
+    type: DataTypes.JSONB,
+    allowNull: false,
+    defaultValue: [],
+  },
+}, {
+  tableName: 'carts',
+  timestamps: true,
 });
-
-User.hasMany(Cart, { foreignKey: 'userId' });
-Cart.belongsTo(User, { foreignKey: 'userId' });
 
 module.exports = Cart;
