@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 
@@ -7,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("NexusCart Backend Running 🚀");
+  res.send("NexusCart Backend Running");
 });
 
 module.exports = app;
