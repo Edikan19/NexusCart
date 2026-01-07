@@ -1,23 +1,32 @@
-require("dotenv").config();
-
-const express = require("express");
-const cors = require("cors");
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const { Sequelize } = require('sequelize');
 
 const app = express();
 
+// Database connection
+const sequelize = new Sequelize(process.env.DB_URI);
+
+sequelize.authenticate()
+  .then(() => console.log('Connected to PostgreSQL'))
+  .catch(err => console.error('DB connection error:', err));
+
+sequelize.sync({ force: false })
+  .then(() => console.log('Database synced'))
+  .catch(err => console.error('Sync error:', err));
+
+// Middleware
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    service: "nexuscart-backend",
-    uptime: process.uptime()
-  });
-});
+// Routes
+app.use('/api/auth', require('./routes/auth'));
 
-app.get("/", (req, res) => {
-  res.send("NexusCart Backend Running");
+// Health-check route
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', message: 'NexusCart Backend is running' });
 });
 
 module.exports = app;
