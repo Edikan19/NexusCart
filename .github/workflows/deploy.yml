@@ -1,0 +1,35 @@
+name: Deploy NexusCart
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install root dependencies
+        run: npm install
+      - name: Install backend dependencies
+        run: cd backend && npm install
+      - name: Set up PostgreSQL
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: '15'
+          postgresql db: 'nexuscart_test'
+          postgresql user: 'postgres'
+          postgresql password: 'password'
+      - name: Create .env for backend
+        run: |
+          cd backend
+          echo "PORT=5000" > .env
+          echo "DB_URI=postgresql://postgres:edikan17@localhost:5432/nexuscart_test" >> .env
+          echo "JWT_SECRET=test-secret" >> .env
+      - name: Test backend
+        run: cd backend && npm test
+      - name: Deploy backend
+        run: echo "Deploy logic here" 
