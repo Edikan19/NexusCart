@@ -24,7 +24,7 @@ export default function App() {
       setMessages([...messages, { type: 'user', text: userMessage }]);
       setUserInput('');
       
-      setMessages(prev => [...prev, { type: 'ai', text: '🤔 Thinking...', loading: true }]);
+      setMessages(prev => [...prev, { type: 'ai', text: 'Thinking...', loading: true }]);
       
       const aiResponse = await getAIRecommendations(userMessage);
       const productNames = extractProductNames(aiResponse);
