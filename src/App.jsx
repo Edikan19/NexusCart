@@ -1,7 +1,7 @@
 import { getAIRecommendations } from './utils/aiService';
-import { extractProductNames, searchProductImage, getStoreLinks } from './utils/productSearch';
+import { extractProductNames, getStoreLinks } from './utils/productSearch';
 import { useState } from 'react';
-import { Sparkles, Send, User } from 'lucide-react';
+import { Sparkles, Send, User, ExternalLink } from 'lucide-react';
 
 export default function App() {
   const [username, setUsername] = useState('');
@@ -45,6 +45,69 @@ export default function App() {
         return updated;
       });
     }
+  };
+
+  const renderAIMessage = (msg) => {
+    if (!msg.products || msg.products.length === 0) {
+      return <div className="whitespace-pre-wrap">{msg.text}</div>;
+    }
+
+    const lines = msg.text.split('\n');
+    const elements = [];
+    let currentProductIndex = -1;
+
+    lines.forEach((line, idx) => {
+      const productMatch = line.match(/^###\s*\d+\.\s*(.+)$/);
+      
+      if (productMatch) {
+        currentProductIndex++;
+        const productName = productMatch[1].trim();
+        const product = msg.products[currentProductIndex];
+        
+        elements.push(
+          <div key={`line-${idx}`} className="mb-4 mt-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-3">{productName}</h3>
+            {product && (
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
+                <p className="text-xs font-semibold text-purple-900 mb-2 flex items-center gap-1">
+                  <ExternalLink className="w-3 h-3" />
+                  Check availability:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {product.stores.map((store, storeIdx) => (
+                    <a
+                      key={storeIdx}
+                      href={store.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-3 py-1.5 bg-white text-purple-700 border border-purple-300 rounded-full text-xs font-medium hover:bg-purple-100 hover:border-purple-400 transition-colors shadow-sm"
+                    >
+                      {store.name}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      } else if (line.trim().startsWith('*')) {
+        elements.push(
+          <div key={`line-${idx}`} className="ml-4 mb-2">
+            <p className="text-gray-700 text-sm leading-relaxed">{line}</p>
+          </div>
+        );
+      } else if (line.trim()) {
+        elements.push(
+          <p key={`line-${idx}`} className="mb-2 text-gray-800">
+            {line}
+          </p>
+        );
+      } else {
+        elements.push(<div key={`line-${idx}`} className="mb-2"></div>);
+      }
+    });
+
+    return <div>{elements}</div>;
   };
 
   if (!isLoggedIn) {
@@ -116,34 +179,14 @@ export default function App() {
               {messages.map((msg, idx) => (
                 <div key={idx}>
                   <div className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} mb-2`}>
-                    <div className={`max-w-2xl px-4 py-3 rounded-lg ${msg.type === 'user' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-800'}`}>
-                      <div className="whitespace-pre-wrap">{msg.text}</div>
+                    <div className={`max-w-full px-4 py-3 rounded-lg ${msg.type === 'user' ? 'bg-purple-600 text-white' : 'bg-gray-50 text-gray-800'}`}>
+                      {msg.type === 'user' ? (
+                        <div className="whitespace-pre-wrap">{msg.text}</div>
+                      ) : (
+                        renderAIMessage(msg)
+                      )}
                     </div>
                   </div>
-                  
-                  {msg.type === 'ai' && msg.products && msg.products.length > 0 && (
-                    <div className="space-y-3 ml-2 mt-4">
-                      <p className="text-sm font-semibold text-gray-700 mb-2">Quick Links to Check Availability:</p>
-                      {msg.products.map((product, prodIdx) => (
-                        <div key={prodIdx} className="bg-white rounded-lg shadow-sm p-3 border border-gray-200">
-                          <h3 className="font-semibold text-sm mb-2 text-gray-800">{product.name}</h3>
-                          <div className="flex flex-wrap gap-2">
-                            {product.stores.map((store, storeIdx) => (
-                              <a
-                                key={storeIdx}
-                                href={store.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs hover:bg-purple-200 transition-colors"
-                              >
-                                {store.name}
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
