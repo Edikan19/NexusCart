@@ -59,6 +59,11 @@ export default function App() {
     lines.forEach((line, idx) => {
       const productMatch = line.match(/^###\s*\d+\.\s*(.+)$/);
       
+      // Skip lines that are just dashes or underscores
+      if (line.trim().match(/^[-_]+$/)) {
+        return;
+      }
+      
       if (productMatch) {
         currentProductIndex++;
         const productName = productMatch[1].trim();
@@ -91,17 +96,25 @@ export default function App() {
           </div>
         );
       } else if (line.trim().startsWith('*')) {
-        elements.push(
-          <div key={`line-${idx}`} className="ml-4 mb-2">
-            <p className="text-gray-700 text-sm leading-relaxed">{line}</p>
-          </div>
-        );
+        // Remove all asterisks and clean the text
+        const cleanText = line.replace(/\*+/g, '').trim();
+        if (cleanText) {
+          elements.push(
+            <div key={`line-${idx}`} className="ml-4 mb-2">
+              <p className="text-gray-700 text-sm leading-relaxed">{cleanText}</p>
+            </div>
+          );
+        }
       } else if (line.trim()) {
-        elements.push(
-          <p key={`line-${idx}`} className="mb-2 text-gray-800">
-            {line}
-          </p>
-        );
+        // Remove any stray asterisks from regular lines too
+        const cleanLine = line.replace(/\*+/g, '').trim();
+        if (cleanLine) {
+          elements.push(
+            <p key={`line-${idx}`} className="mb-2 text-gray-800">
+              {cleanLine}
+            </p>
+          );
+        }
       } else {
         elements.push(<div key={`line-${idx}`} className="mb-2"></div>);
       }
@@ -112,28 +125,35 @@ export default function App() {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <Sparkles className="w-10 h-10 text-purple-600" />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-500 to-purple-800 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-40 left-40 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+        </div>
+        
+        <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-10 w-full max-w-md relative z-10 transform hover:scale-105 transition-transform duration-300">
+          <div className="flex items-center justify-center gap-3 mb-8 animate-fade-in">
+            <Sparkles className="w-12 h-12 text-purple-600 animate-pulse" />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 bg-clip-text text-transparent animate-gradient">
               NexusCart
             </h1>
           </div>
-          <p className="text-gray-600 text-center mb-6">
+          <p className="text-gray-600 text-center mb-8 text-lg animate-fade-in-delay">
             AI-powered shopping recommendations
           </p>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleLogin} className="space-y-4">
             <input
               type="text"
               placeholder="Enter your name"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 mb-4"
+              className="w-full px-5 py-4 rounded-xl border-2 border-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-lg"
             />
             <button
               type="submit"
-              className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors font-semibold"
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               Get Started
             </button>
