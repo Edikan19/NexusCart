@@ -1,5 +1,5 @@
-import { getAIRecommendations } from './Utils/aiService';
-import { extractProductNames, searchProductImage, getStoreLinks } from './Utils/productSearch';
+import { getAIRecommendations } from './utils/aiService';
+import { extractProductNames, searchProductImage, getStoreLinks } from './utils/productSearch';
 import { useState } from 'react';
 import { Sparkles, Send, User } from 'lucide-react';
 
@@ -16,50 +16,36 @@ export default function App() {
     }
   };
 
- const handleSendMessage = async (e) => {
-  e.preventDefault();
-  console.log("1. Form submitted");
-  
-  if (userInput.trim()) {
-    const userMessage = userInput;
-    setMessages([...messages, { type: 'user', text: userMessage }]);
-    setUserInput('');
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
     
-    console.log("2. Showing loading message");
-    setMessages(prev => [...prev, { type: 'ai', text: 'Thinking...', loading: true }]);
-    
-    console.log("3. Calling AI...");
-    const aiResponse = await getAIRecommendations(userMessage);
-    console.log("4. AI Response received:", aiResponse.substring(0, 100));
-    
-    console.log("5. Extracting product names...");
-    const productNames = extractProductNames(aiResponse);
-    console.log("6. Extracted product names:", productNames);
-    
-    console.log("7. Fetching images...");
-    const productsWithImages = await Promise.all(
-      productNames.map(async (name) => ({
+    if (userInput.trim()) {
+      const userMessage = userInput;
+      setMessages([...messages, { type: 'user', text: userMessage }]);
+      setUserInput('');
+      
+      setMessages(prev => [...prev, { type: 'ai', text: '🤔 Thinking...', loading: true }]);
+      
+      const aiResponse = await getAIRecommendations(userMessage);
+      const productNames = extractProductNames(aiResponse);
+      
+      const productsWithStores = productNames.map((name) => ({
         name,
-        image: await searchProductImage(name),
         stores: getStoreLinks(name)
-      }))
-    );
-    console.log("8. Products with images:", productsWithImages);
-    
-    console.log("9. Updating messages...");
-    setMessages(prev => {
-      const updated = [...prev];
-      updated[updated.length - 1] = { 
-        type: 'ai', 
-        text: aiResponse,
-        products: productsWithImages,
-        loading: false
-      };
-      return updated;
-    });
-    console.log("10. Done!");
-  }
-};
+      }));
+      
+      setMessages(prev => {
+        const updated = [...prev];
+        updated[updated.length - 1] = { 
+          type: 'ai', 
+          text: aiResponse,
+          products: productsWithStores,
+          loading: false
+        };
+        return updated;
+      });
+    }
+  };
 
   if (!isLoggedIn) {
     return (
@@ -113,9 +99,9 @@ export default function App() {
 
       <div className="max-w-4xl mx-auto p-4">
         <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-6 mb-6 text-white">
-          <h2 className="text-xl font-bold mb-2">Tell me what you're looking for!</h2>
+          <h2 className="text-xl font-bold mb-2">Tell me what you are looking for!</h2>
           <p className="text-purple-100">
-            Describe any product you need and I'll recommend the best options for you.
+            Describe any product you need and I will recommend the best options for you.
           </p>
         </div>
 
@@ -125,65 +111,46 @@ export default function App() {
               <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>Start a conversation to get personalized recommendations</p>
             </div>
-    ) : (
-      <div className="space-y-4">
-        {messages.map((msg, idx) => {
-          console.log(`Message ${idx}:`, msg);
-          return (
-            <div key={idx}>
-              <div className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-2xl px-4 py-3 rounded-lg ${msg.type === 'user' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-800'}`}>
-                  <div className="whitespace-pre-wrap">{msg.text}</div>
-                </div>
-              </div>
-              
-              {msg.type === 'ai' && (
-                <div className="mt-4 ml-4">
-                  {msg.products ? (
-                    <div className="space-y-4">
-                      <p className="text-green-600">Products found: {msg.products.length}</p>
+          ) : (
+            <div className="space-y-6">
+              {messages.map((msg, idx) => (
+                <div key={idx}>
+                  <div className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} mb-2`}>
+                    <div className={`max-w-2xl px-4 py-3 rounded-lg ${msg.type === 'user' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-800'}`}>
+                      <div className="whitespace-pre-wrap">{msg.text}</div>
+                    </div>
+                  </div>
+                  
+                  {msg.type === 'ai' && msg.products && msg.products.length > 0 && (
+                    <div className="space-y-3 ml-2 mt-4">
+                      <p className="text-sm font-semibold text-gray-700 mb-2">Quick Links to Check Availability:</p>
                       {msg.products.map((product, prodIdx) => (
-                        <div key={prodIdx} className="bg-white rounded-lg shadow-md p-4 max-w-2xl">
-                          <div className="flex gap-4">
-                            <img 
-                              src={product.image} 
-                              alt={product.name}
-                              className="w-32 h-32 object-cover rounded-lg"
-                            />
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-                              <p className="text-sm text-gray-600 mb-3">Available at:</p>
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {product.stores.map((store, storeIdx) => (
-                                  <a
-                                    key={storeIdx}
-                                    href={store.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm hover:bg-purple-200 transition-colors inline-block"
-                                  >
-                                    {store.name}
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
+                        <div key={prodIdx} className="bg-white rounded-lg shadow-sm p-3 border border-gray-200">
+                          <h3 className="font-semibold text-sm mb-2 text-gray-800">{product.name}</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {product.stores.map((store, storeIdx) => (
+                              <a
+                                key={storeIdx}
+                                href={store.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs hover:bg-purple-200 transition-colors"
+                              >
+                                {store.name}
+                              </a>
+                            ))}
                           </div>
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <p className="text-red-600">No products data</p>
                   )}
                 </div>
-              )}
+              ))}
             </div>
-          );
-        })}
-      </div>
-    )}
-</div>
+          )}
+        </div>
 
-<form onSubmit={handleSendMessage} className="flex gap-2">
+        <form onSubmit={handleSendMessage} className="flex gap-2">
           <input
             type="text"
             placeholder="E.g., I need running shoes under ₦50,000"

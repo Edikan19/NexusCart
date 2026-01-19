@@ -17,32 +17,28 @@ export function extractProductNames(aiResponse) {
 // Function to search for product image using a placeholder service
 // In production, you'd use Google Custom Search API, Bing Image Search, or scrape e-commerce sites
 export async function searchProductImage(productName) {
-  // For now, we'll use a placeholder image service
-  // You can replace this with actual API calls to image search services
-  
   try {
-    // Using DuckDuckGo image search would require CORS proxy
-    // For demo purposes, we'll use placeholder images based on product category
-    
     const lowerName = productName.toLowerCase();
     
-    // Determine category and return relevant placeholder
-    if (lowerName.includes('nike') || lowerName.includes('adidas') || lowerName.includes('shoe')) {
-      return `https://source.unsplash.com/400x300/?running+shoes,${encodeURIComponent(productName)}`;
+    // Using UI Avatars API which is CORS-friendly
+    // Format: https://ui-avatars.com/api/?name=Text&size=300&background=color&color=fff
+    
+    if (lowerName.includes('nike') || lowerName.includes('adidas') || lowerName.includes('shoe') || lowerName.includes('sneaker')) {
+      return 'https://ui-avatars.com/api/?name=Shoes&size=300&background=9333EA&color=fff&bold=true&format=png';
     } else if (lowerName.includes('laptop') || lowerName.includes('computer')) {
-      return `https://source.unsplash.com/400x300/?laptop,${encodeURIComponent(productName)}`;
+      return 'https://ui-avatars.com/api/?name=Laptop&size=300&background=2563EB&color=fff&bold=true&format=png';
     } else if (lowerName.includes('phone') || lowerName.includes('smartphone')) {
-      return `https://source.unsplash.com/400x300/?smartphone,${encodeURIComponent(productName)}`;
+      return 'https://ui-avatars.com/api/?name=Phone&size=300&background=EC4899&color=fff&bold=true&format=png';
     } else if (lowerName.includes('watch')) {
-      return `https://source.unsplash.com/400x300/?smartwatch,${encodeURIComponent(productName)}`;
+      return 'https://ui-avatars.com/api/?name=Watch&size=300&background=10B981&color=fff&bold=true&format=png';
     } else if (lowerName.includes('headphone') || lowerName.includes('earphone')) {
-      return `https://source.unsplash.com/400x300/?headphones,${encodeURIComponent(productName)}`;
+      return 'https://ui-avatars.com/api/?name=Audio&size=300&background=F59E0B&color=fff&bold=true&format=png';
     } else {
-      return `https://source.unsplash.com/400x300/?product,${encodeURIComponent(productName)}`;
+      return 'https://ui-avatars.com/api/?name=Product&size=300&background=6B7280&color=fff&bold=true&format=png';
     }
   } catch (error) {
     console.error('Error fetching product image:', error);
-    return 'https://source.unsplash.com/400x300/?product';
+    return 'https://ui-avatars.com/api/?name=NexusCart&size=300&background=9333EA&color=fff&bold=true&format=png';
   }
 }
 
