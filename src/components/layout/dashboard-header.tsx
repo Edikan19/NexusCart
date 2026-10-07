@@ -1,4 +1,4 @@
-import { NotificationMenu } from "@/components/layout/notification-menu";
+  import { NotificationMenu } from "@/components/layout/notification-menu";
 import { UserMenu } from "@/components/layout/user-menu";
 
 export function DashboardHeader() {
